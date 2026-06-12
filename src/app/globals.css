@@ -1,0 +1,236 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fdfbf7;
+  --foreground: #1e1315;
+  
+  --card: rgba(255, 253, 249, 0.85);
+  --card-foreground: #1e1315;
+  
+  --popover: #fdfbf7;
+  --popover-foreground: #1e1315;
+  
+  --primary: #871a1d;
+  --primary-hover: #a72834;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #f5f0e6;
+  --secondary-foreground: #1e1315;
+  
+  --muted: #f5f0e6;
+  --muted-foreground: #7c6d70;
+  
+  --accent: #b59410;
+  --accent-foreground: #fdfbf7;
+  
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  
+  --border: rgba(135, 26, 29, 0.08);
+  --input: rgba(255, 255, 255, 0.9);
+  --ring: #871a1d;
+  
+  --radius: 0.75rem;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(135, 26, 29, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(181, 148, 16, 0.03) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(18, 67, 23, 0.02) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism custom classes */
+.glass-panel {
+  background: rgba(253, 251, 247, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(135, 26, 29, 0.1);
+  box-shadow: 0 10px 30px rgba(135, 26, 29, 0.06);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(135, 26, 29, 0.06);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(135, 26, 29, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(135, 26, 29, 0.08);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(135, 26, 29, 0.15);
+  border-radius: 0.5rem;
+  color: #1e1315;
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  background: #ffffff;
+  border-color: #871a1d;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(135, 26, 29, 0.15);
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(245, 240, 230, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(135, 26, 29, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(135, 26, 29, 0.3);
+}
+
+/* Dynamic glow effects */
+.glow-crimson {
+  box-shadow: 0 0 25px rgba(135, 26, 29, 0.1);
+}
+
+.glow-gold {
+  box-shadow: 0 0 25px rgba(181, 148, 16, 0.08);
+}
+
+/* Print-specific overrides */
+@media print {
+  body {
+    background: #fff !important;
+    background-image: none !important;
+    color: #000 !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  .print-receipt-container {
+    width: 80mm;
+    margin: 0 auto;
+    padding: 0;
+    color: #000 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+  }
+  
+  .print-invoice-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #000 !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
+  }
+}
+
+/* Light theme text color overrides for hardcoded Tailwind dark-theme classes */
+h1.text-white,
+h2.text-white,
+h3.text-white,
+h4.text-white,
+h5.text-white,
+h6.text-white,
+.text-white:not(button):not(button *):not(a):not(a *):not(.bg-primary *):not(.bg-primary-hover *):not(.bg-emerald-500 *):not(.bg-emerald-600 *):not(.bg-red-500 *):not(.bg-red-600 *):not(.bg-green-600 *) {
+  color: var(--foreground) !important;
+}
+
+.text-slate-100 {
+  color: #1a1214 !important;
+}
+
+.text-slate-200 {
+  color: #261b1d !important;
+}
+
+.text-slate-300 {
+  color: #382a2d !important;
+}
+
+.text-slate-400 {
+  color: #57464a !important;
+}
+
+.text-slate-500 {
+  color: #7a686b !important;
+}
+
+.text-emerald-400 {
+  color: #124317 !important; /* Highly readable dark forest green matching the logo leaves */
+}
+
+.text-emerald-500 {
+  color: #124317 !important;
+}
+
+.bg-emerald-500\/5 {
+  background-color: rgba(18, 67, 23, 0.05) !important;
+}
+
+.bg-emerald-500\/10 {
+  background-color: rgba(18, 67, 23, 0.08) !important;
+}
+
+.border-emerald-500\/10 {
+  border-color: rgba(18, 67, 23, 0.1) !important;
+}
+
+.border-emerald-500\/20,
+.border-emerald-500\/30 {
+  border-color: rgba(18, 67, 23, 0.15) !important;
+}
+
+/* Fix User profile text visibility in Sidebar */
+.truncate.text-slate-800 {
+  color: #1e1315 !important;
+}
+

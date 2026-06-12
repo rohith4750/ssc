@@ -1,0 +1,180 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   // "ADMIN", "MANAGER", "STAFF"
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LunchCustomer {
+  id               String                 @id // LP0001, LP0002 etc.
+  qrCode           String                 @unique
+  name             String?
+  phone            String?
+  defaultPackType  String                 // "SINGLE", "DOUBLE"
+  defaultWithRice  Boolean                @default(false)
+  active           Boolean                @default(true)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  transactions     DailyLunchTransaction[]
+}
+
+model DailyLunchTransaction {
+  id            String        @id @default(uuid())
+  date          DateTime      @default(now())
+  customerId    String
+  customer      LunchCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  packType      String        // "SINGLE", "DOUBLE"
+  withRice      Boolean
+  extras        Json          // List of extras: [{name: string, price: number, quantity: number}]
+  totalAmount   Float
+  paymentStatus String        // "PAID", "PENDING"
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model BulkOrder {
+  id            String   @id @default(uuid())
+  customerName  String
+  contactNumber String
+  date          DateTime @default(now())
+  packType      String   // "SINGLE", "DOUBLE"
+  withRice      Boolean
+  quantity      Int
+  extras        Json     // List of extras: [{name: string, price: number, quantity: number}]
+  totalAmount   Float
+  advancePaid   Float    @default(0.0)
+  balanceAmount Float
+  status        String   // "PENDING", "COMPLETED", "CANCELLED"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model CateringOrder {
+  id            String   @id @default(uuid())
+  customerName  String
+  contactNumber String
+  eventDate     DateTime
+  location      String
+  guestCount    Int
+  menuItems     Json     // List of items configured for the event
+  totalAmount   Float
+  advanceAmount Float    @default(0.0)
+  balanceAmount Float
+  status        String   // "PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"
+  paymentStatus String   // "PENDING", "PARTIALLY_PAID", "FULLY_PAID"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model MenuItem {
+  id        String   @id @default(uuid())
+  name      String
+  category  String   // "CURRY_POINT", "CATERING", "LUNCH_PACK_EXTRA"
+  price     Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CurryPointOrder {
+  id            String   @id @default(uuid())
+  date          DateTime @default(now())
+  items         Json     // [{name: string, price: number, quantity: number, unit?: string}]
+  totalAmount   Float
+  paymentMethod String   // "CASH", "UPI", "CARD"
+  createdAt     DateTime @default(now())
+}
+
+model Worker {
+  id          String       @id @default(uuid())
+  name        String
+  role        String       // "COOK", "HELPER", "SERVER", "CLEANER", "DRIVER"
+  salaryType  String       // "MONTHLY", "DAILY_WAGE"
+  rate        Float        // Salary or Daily rate
+  phone       String?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  attendance  Attendance[]
+}
+
+model Attendance {
+  id             String   @id @default(uuid())
+  date           DateTime @default(now())
+  workerId       String
+  worker         Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  status         String   // "PRESENT", "HALF_DAY", "ABSENT", "OVERTIME"
+  overtimeHours  Float    @default(0.0)
+  calculatedWage Float
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Expense {
+  id        String   @id @default(uuid())
+  date      DateTime @default(now())
+  vendor    String
+  amount    Float
+  category  String   // "VEGETABLES", "GAS", "ELECTRICITY", "TRANSPORT", "KITCHEN_SUPPLIES", "SALARY", "MISCELLANEOUS"
+  notes     String?
+  billImage String?  // File upload path or base64 URL
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InventoryItem {
+  id            String                 @id @default(uuid())
+  name          String                 @unique
+  unit          String                 // "kg", "liter", "cylinder", "packet" etc.
+  currentStock  Float                  @default(0.0)
+  minStockLevel Float                  @default(0.0)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  transactions  InventoryTransaction[]
+}
+
+model InventoryTransaction {
+  id              String        @id @default(uuid())
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  type            String        // "PURCHASED", "CONSUMED", "ADJUSTED"
+  quantity        Float
+  unitPrice       Float?
+  date            DateTime      @default(now())
+  notes           String?
+  createdAt       DateTime      @default(now())
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  date          DateTime @default(now())
+  amount        Float
+  method        String   // "CASH", "UPI", "CARD"
+  referenceType String   // "LUNCH_PACK", "CATERING", "BULK_ORDER", "CURRY_POINT"
+  referenceId   String   // ID or unique code (e.g. LP0001 or Catering ID)
+  notes         String?
+  createdAt     DateTime @default(now())
+}
+
+model Setting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
