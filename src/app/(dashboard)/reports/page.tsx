@@ -11,7 +11,6 @@ import {
   TrendingDown,
   DollarSign,
   Coffee,
-  Soup,
   UtensilsCrossed,
   Receipt,
   Search,
@@ -67,21 +66,11 @@ export default function ReportsPage() {
     // Sheet 1: Financial Overview
     const overviewData = [
       { Metric: 'Gross Sales Revenue', Amount: report.totalSales },
-      { Metric: 'Curry Point Sales', Amount: report.totalCurry },
       { Metric: 'Daily Lunch Pack Sales', Amount: report.totalLunch },
       { Metric: 'Bulk Orders Sales', Amount: report.totalBulk },
       { Metric: 'Total Operating Expenses', Amount: report.totalExpenses },
       { Metric: 'Net Operating Profit', Amount: report.netProfit },
     ];
-
-    // Sheet 2: Curry Sales Logs
-    const curryLogs = report.currySales.map((item: any) => ({
-      ID: item.id.slice(0, 8),
-      Date: new Date(item.date).toLocaleDateString('en-IN'),
-      Items: JSON.stringify(item.items),
-      Total: item.totalAmount,
-      Method: item.paymentMethod,
-    }));
 
     // Sheet 3: Daily Lunch Logs
     const lunchLogs = report.lunchSales.map((item: any) => ({
@@ -106,12 +95,10 @@ export default function ReportsPage() {
     const wb = XLSX.utils.book_new();
 
     const wsOverview = XLSX.utils.json_to_sheet(overviewData);
-    const wsCurry = XLSX.utils.json_to_sheet(curryLogs);
     const wsLunch = XLSX.utils.json_to_sheet(lunchLogs);
     const wsExpenses = XLSX.utils.json_to_sheet(expenseLogs);
 
     XLSX.utils.book_append_sheet(wb, wsOverview, 'Financial Overview');
-    XLSX.utils.book_append_sheet(wb, wsCurry, 'Curry Point Sales');
     XLSX.utils.book_append_sheet(wb, wsLunch, 'Lunch Pack Sales');
     XLSX.utils.book_append_sheet(wb, wsExpenses, 'Operating Expenses');
 
@@ -126,7 +113,6 @@ export default function ReportsPage() {
   // Data processing for charts
   const revenueChartData = report
     ? [
-        { name: 'Curry Point', value: report.totalCurry, color: '#10b981' },
         { name: 'Lunch Packs', value: report.totalLunch, color: '#059669' },
         { name: 'Bulk Orders', value: report.totalBulk, color: '#34d399' },
       ].filter((d) => d.value > 0)
@@ -366,20 +352,8 @@ export default function ReportsPage() {
             <div className="p-6 rounded-2xl glass-panel relative print:bg-white print:text-black print:border-solid print:border print:border-black/10 print:shadow-none">
               <h3 className="text-base font-bold text-white mb-4 print:text-black">Sales Activity Ledger</h3>
               <div className="max-h-96 overflow-y-auto pr-1 scrollbar-thin divide-y divide-white/5 print:divide-black/10">
-                {report.lunchTransactionsCount + report.curryOrdersCount + report.bulkOrdersCount > 0 ? (
+                {report.lunchTransactionsCount + report.bulkOrdersCount > 0 ? (
                   <>
-                    {/* Curry POS Logs */}
-                    {report.currySales.map((c: any) => (
-                      <div key={c.id} className="flex justify-between py-2.5 text-xs">
-                        <div>
-                          <span className="font-semibold text-slate-200 print:text-black">Curry POS Checkout</span>
-                          <span className="text-[10px] text-slate-400 block mt-0.5">
-                            {new Date(c.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} &bull; Mode: {c.paymentMethod}
-                          </span>
-                        </div>
-                        <span className="font-bold text-white print:text-black">₹{c.totalAmount}</span>
-                      </div>
-                    ))}
                     {/* Daily Lunch checkins */}
                     {report.lunchSales.map((l: any) => (
                       <div key={l.id} className="flex justify-between py-2.5 text-xs">

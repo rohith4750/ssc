@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Sri Sandilyasa Caterers (SSC)",
-  description: "Smart Catering, Lunch Pack & Curry Point Management System - Kakinada",
+  description: "Smart Catering & Lunch Pack Management System - Kakinada",
 };
 
 export default function RootLayout({

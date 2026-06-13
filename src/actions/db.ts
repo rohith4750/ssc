@@ -559,40 +559,6 @@ export async function createMenuItem(data: { name: string; category: string; pri
   return item;
 }
 
-export async function createCurryPointOrder(data: {
-  items: any[];
-  totalAmount: number;
-  paymentMethod: string;
-}) {
-  const order = await prisma.curryPointOrder.create({
-    data: {
-      items: data.items,
-      totalAmount: data.totalAmount,
-      paymentMethod: data.paymentMethod,
-    },
-  });
-
-  // Create payment log
-  await prisma.payment.create({
-    data: {
-      date: new Date(),
-      amount: data.totalAmount,
-      method: data.paymentMethod,
-      referenceType: 'CURRY_POINT',
-      referenceId: order.id,
-      notes: `Curry Point Walk-in Sale`,
-    },
-  });
-
-  // Deduct from inventory where applicable (e.g., matching ingredients based on static estimation)
-  // For a simple catering business, we can record consumption logs here or do it manually.
-  // We'll also support manual inventory consumption logs.
-
-  revalidatePath('/curry-point');
-  revalidatePath('/dashboard');
-  return order;
-}
-
 // ==========================================
 // 6. WORKERS & ATTENDANCE
 // ==========================================
@@ -946,11 +912,6 @@ export async function getDashboardStats() {
   startOfMonth.setHours(0, 0, 0, 0);
 
   // 1. Sales today
-  const currySalesToday = await prisma.curryPointOrder.aggregate({
-    where: { date: { gte: startOfToday, lte: endOfToday } },
-    _sum: { totalAmount: true },
-  });
-
   const lunchSalesToday = await prisma.dailyLunchTransaction.aggregate({
     where: { date: { gte: startOfToday, lte: endOfToday } },
     _sum: { totalAmount: true },
@@ -968,7 +929,6 @@ export async function getDashboardStats() {
   });
 
   const salesToday =
-    (currySalesToday._sum.totalAmount || 0) +
     (lunchSalesToday._sum.totalAmount || 0) +
     (bulkSalesToday._sum.totalAmount || 0);
 
@@ -983,11 +943,6 @@ export async function getDashboardStats() {
   const profitToday = salesToday - expensesToday;
 
   // 3. Sales this month
-  const currySalesMonth = await prisma.curryPointOrder.aggregate({
-    where: { date: { gte: startOfMonth } },
-    _sum: { totalAmount: true },
-  });
-
   const lunchSalesMonthAgg = await prisma.dailyLunchTransaction.aggregate({
     where: { date: { gte: startOfMonth } },
     _sum: { totalAmount: true },
@@ -1019,7 +974,6 @@ export async function getDashboardStats() {
   });
 
   const salesMonth =
-    (currySalesMonth._sum.totalAmount || 0) +
     (lunchSalesMonth || 0) +
     (bulkSalesMonth._sum.totalAmount || 0);
 
@@ -1077,11 +1031,6 @@ export async function getReportStats(startDateStr: string, endDateStr: string) {
   const endDate = new Date(endDateStr);
   endDate.setHours(23, 59, 59, 999);
 
-  // Curry POS sales
-  const currySales = await prisma.curryPointOrder.findMany({
-    where: { date: { gte: startDate, lte: endDate } },
-  });
-
   // Lunch pack sales
   const lunchSales = await prisma.dailyLunchTransaction.findMany({
     where: { date: { gte: startDate, lte: endDate } },
@@ -1104,8 +1053,6 @@ export async function getReportStats(startDateStr: string, endDateStr: string) {
   });
 
   // Sum calculations
-  const totalCurry = currySales.reduce((sum, o) => sum + o.totalAmount, 0);
-  
   let totalLunch = lunchSales.reduce((sum, o) => sum + o.totalAmount, 0);
 
   // Add flat monthly pricing for monthly customers who had active deliveries in this period
@@ -1138,22 +1085,19 @@ export async function getReportStats(startDateStr: string, endDateStr: string) {
   });
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const totalSales = totalCurry + totalLunch + totalBulk; // standard billing revenue
+  const totalSales = totalLunch + totalBulk; // standard billing revenue
 
   return {
     totalSales,
     totalExpenses,
     netProfit: totalSales - totalExpenses,
-    totalCurry,
     totalLunch,
     totalBulk,
-    curryOrdersCount: currySales.length,
     lunchTransactionsCount: lunchSales.length,
     bulkOrdersCount: bulkSales.length,
     cateringConfirmedCount: cateringOrders.length,
     expenses,
     payments,
-    currySales,
     lunchSales,
     bulkSales,
     cateringOrders,

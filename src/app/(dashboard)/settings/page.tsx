@@ -10,7 +10,6 @@ import {
   Plus,
   Save,
   Coffee,
-  Soup,
   ListFilter,
   Users,
   Shield,
@@ -242,7 +241,7 @@ export default function SettingsPage() {
           <Settings className="w-8 h-8 text-emerald-400" /> System Settings & Pricing Defaults
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Configure default lunch pack prices, update extras rates, and customize Curry Point POS check-out items registry.
+          Configure default lunch pack prices, update extras rates, and customize system menu items registry.
         </p>
       </div>
 
@@ -566,7 +565,6 @@ export default function SettingsPage() {
                       value={newMenuCat}
                       onChange={(e) => setNewMenuCat(e.target.value)}
                     >
-                      <option value="CURRY_POINT">Curry Point POS</option>
                       <option value="LUNCH_PACK_EXTRA">Lunch Pack Extra</option>
                       <option value="CATERING">Catering Specials</option>
                     </select>

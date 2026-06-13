@@ -6,7 +6,6 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard,
-  Soup,
   UtensilsCrossed,
   Users,
   Package,
@@ -36,7 +35,6 @@ export default function Sidebar({ user }: SidebarProps) {
   const allMenuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'MANAGER'] },
     { name: 'Lunch Packs', path: '/lunch-packs', icon: Beef, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
-    // { name: 'Curry Point POS', path: '/curry-point', icon: Soup, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
     // { name: 'Catering Orders', path: '/catering', icon: UtensilsCrossed, roles: ['ADMIN', 'MANAGER'] },
     { name: 'Worker Payroll', path: '/workers', icon: Users, roles: ['ADMIN'] },
     { name: 'Inventory Stock', path: '/inventory', icon: Package, roles: ['ADMIN', 'MANAGER'] },
@@ -191,17 +189,6 @@ export default function Sidebar({ user }: SidebarProps) {
 
         {/* Bottom Actions - Logout */}
         <div className="p-4 border-t border-[#871a1d]/10 space-y-2 font-sans">
-          {/* Quick POS Access for utility */}
-          {pathname !== '/curry-point' && (
-            <Link
-              href="/curry-point"
-              className="w-full py-2.5 px-4 bg-primary hover:bg-primary-hover active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/15 transition duration-150 border-none cursor-pointer"
-            >
-              <Soup className="w-4 h-4 shrink-0" />
-              <span>Curry Point POS</span>
-            </Link>
-          )}
-
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
             className="w-full py-2.5 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-600 hover:text-red-500 font-medium text-xs rounded-xl flex items-center justify-center gap-2 border border-red-500/10 transition cursor-pointer"

@@ -99,21 +99,13 @@ model CateringOrder {
 model MenuItem {
   id        String   @id @default(uuid())
   name      String
-  category  String   // "CURRY_POINT", "CATERING", "LUNCH_PACK_EXTRA"
+  category  String   // "CATERING", "LUNCH_PACK_EXTRA"
   price     Float
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model CurryPointOrder {
-  id            String   @id @default(uuid())
-  date          DateTime @default(now())
-  items         Json     // [{name: string, price: number, quantity: number, unit?: string}]
-  totalAmount   Float
-  paymentMethod String   // "CASH", "UPI", "CARD"
-  createdAt     DateTime @default(now())
-}
 
 model Worker {
   id          String       @id @default(uuid())
@@ -181,7 +173,7 @@ model Payment {
   date          DateTime @default(now())
   amount        Float
   method        String   // "CASH", "UPI", "CARD"
-  referenceType String   // "LUNCH_PACK", "CATERING", "BULK_ORDER", "CURRY_POINT"
+  referenceType String   // "LUNCH_PACK", "CATERING", "BULK_ORDER"
   referenceId   String   // ID or unique code (e.g. LP0001 or Catering ID)
   notes         String?
   createdAt     DateTime @default(now())

@@ -9,7 +9,6 @@ import {
   Calendar,
   AlertTriangle,
   ChevronRight,
-  Soup,
   Beef,
   UtensilsCrossed,
   Receipt
@@ -173,13 +172,6 @@ export default async function DashboardPage() {
               >
                 <Beef className="w-4 h-4 text-emerald-400" />
                 <span>Lunch Scanner</span>
-              </Link>
-              <Link
-                href="/curry-point"
-                className="flex items-center gap-2 p-3 bg-white/5 hover:bg-emerald-500/15 hover:border-emerald-500/20 rounded-xl border border-white/5 transition text-xs font-semibold text-slate-200"
-              >
-                <Soup className="w-4 h-4 text-emerald-400" />
-                <span>Curry Point POS</span>
               </Link>
               <Link
                 href="/catering"
