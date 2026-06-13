@@ -234,3 +234,42 @@ h6.text-white,
   color: #1e1315 !important;
 }
 
+/* Styling native select dropdown elements and options to fit the light theme */
+select {
+  background-color: var(--secondary) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+select option {
+  background-color: #ffffff !important;
+  color: #1e1315 !important;
+}
+
+/* Force override of hardcoded Tailwind bg-[#0d1423] backgrounds to light secondary theme */
+.bg-\[\#0d1423\] {
+  background-color: var(--secondary) !important;
+  color: var(--foreground) !important;
+}
+
+.bg-\[\#0d1423\] button,
+.bg-\[\#0d1423\] span {
+  color: var(--foreground) !important;
+}
+
+/* Modal panel overrides */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(135, 26, 29, 0.12) !important;
+}
+
+/* Text visibility inside modals */
+.glass-panel h3.text-white {
+  color: #871a1d !important;
+}
+
+.glass-panel label {
+  color: #57464a !important;
+}
+
+

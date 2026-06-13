@@ -31,6 +31,16 @@ async function main() {
     { key: 'extra_rice_price', value: '30', description: 'Price of Extra Rice add-on' },
     { key: 'sweet_price', value: '25', description: 'Price of Sweet add-on' },
     { key: 'fry_price', value: '35', description: 'Price of Fry add-on' },
+    
+    // New pricing settings
+    { key: 'daily_single_pack_price', value: '120', description: 'Daily Plan - Single Pack without Rice' },
+    { key: 'daily_single_pack_rice_price', value: '150', description: 'Daily Plan - Single Pack with Rice' },
+    { key: 'daily_double_pack_price', value: '200', description: 'Daily Plan - Double Pack without Rice' },
+    { key: 'daily_double_pack_rice_price', value: '300', description: 'Daily Plan - Double Pack with Rice' },
+    { key: 'monthly_single_pack_price', value: '3000', description: 'Monthly Plan - Default Single Pack without Rice' },
+    { key: 'monthly_single_pack_rice_price', value: '3750', description: 'Monthly Plan - Default Single Pack with Rice' },
+    { key: 'monthly_double_pack_price', value: '5000', description: 'Monthly Plan - Default Double Pack without Rice' },
+    { key: 'monthly_double_pack_rice_price', value: '7500', description: 'Monthly Plan - Default Double Pack with Rice' },
   ];
 
   for (const s of settings) {
@@ -71,16 +81,25 @@ async function main() {
 
   // 4. Lunch Customers (Mock data)
   const customers = [
-    { id: 'LP0001', qrCode: 'LP0001', name: 'Raju Verma', phone: '9848012345', defaultPackType: 'SINGLE', defaultWithRice: true },
-    { id: 'LP0002', qrCode: 'LP0002', name: 'Sita Devi', phone: '9440154321', defaultPackType: 'SINGLE', defaultWithRice: false },
-    { id: 'LP0003', qrCode: 'LP0003', name: 'Kiran Kumar', phone: '8123456789', defaultPackType: 'DOUBLE', defaultWithRice: true },
-    { id: 'LP0004', qrCode: 'LP0004', name: 'Anjali', phone: '7012345678', defaultPackType: 'DOUBLE', defaultWithRice: false },
+    { id: 'LP0001', qrCode: null, name: 'Raju Verma', phone: '9848012345', route: 'Srinagar', address: 'D.No 4-5-6, Srinagar', mode: 'DAILY', defaultPackType: 'SINGLE', defaultWithRice: true, monthlyPrice: 0 },
+    { id: 'LP0002', qrCode: null, name: 'Sita Devi', phone: '9440154321', route: 'Main Road', address: 'H.No 12-3, Main Road', mode: 'MONTHLY', defaultPackType: 'SINGLE', defaultWithRice: false, monthlyPrice: 3000 },
+    { id: 'LP0003', qrCode: null, name: 'Kiran Kumar', phone: '8123456789', route: 'Srinagar', address: 'Flat 102, Green Meadows, Srinagar', mode: 'MONTHLY', defaultPackType: 'DOUBLE', defaultWithRice: true, monthlyPrice: 7500 },
+    { id: 'LP0004', qrCode: null, name: 'Anjali', phone: '7012345678', route: 'Ramachandrapuram', address: 'D.No 55-2, Near Temple, R.C. Puram', mode: 'DAILY', defaultPackType: 'DOUBLE', defaultWithRice: false, monthlyPrice: 0 },
   ];
 
   for (const c of customers) {
     await prisma.lunchCustomer.upsert({
       where: { id: c.id },
-      update: {},
+      update: {
+        name: c.name,
+        phone: c.phone,
+        route: c.route,
+        address: c.address,
+        mode: c.mode,
+        defaultPackType: c.defaultPackType,
+        defaultWithRice: c.defaultWithRice,
+        monthlyPrice: c.monthlyPrice,
+      },
       create: c,
     });
   }

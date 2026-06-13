@@ -20,15 +20,32 @@ model User {
 
 model LunchCustomer {
   id               String                 @id // LP0001, LP0002 etc.
-  qrCode           String                 @unique
+  qrCode           String?                @unique
   name             String?
   phone            String?
+  route            String?
+  address          String?
+  mode             String                 @default("DAILY") // "DAILY", "MONTHLY"
   defaultPackType  String                 // "SINGLE", "DOUBLE"
   defaultWithRice  Boolean                @default(false)
   active           Boolean                @default(true)
+  monthlyPrice     Float?                 @default(0)
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
   transactions     DailyLunchTransaction[]
+}
+
+model LunchPackPrice {
+  id        String   @id @default(uuid())
+  mode      String   // "DAILY", "MONTHLY", "WEEKLY", etc.
+  packType  String   // "SINGLE", "DOUBLE", etc.
+  withRice  Boolean  @default(false)
+  price     Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([mode, packType, withRice])
 }
 
 model DailyLunchTransaction {

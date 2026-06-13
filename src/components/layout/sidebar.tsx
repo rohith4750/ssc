@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard,
@@ -31,17 +31,21 @@ export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Lunch Packs', path: '/lunch-packs', icon: Beef },
-    { name: 'Curry Point POS', path: '/curry-point', icon: Soup },
-    { name: 'Catering Orders', path: '/catering', icon: UtensilsCrossed },
-    { name: 'Worker Payroll', path: '/workers', icon: Users },
-    { name: 'Inventory Stock', path: '/inventory', icon: Package },
-    { name: 'Expenses', path: '/expenses', icon: Receipt },
-    { name: 'Reports', path: '/reports', icon: BarChart3 },
-    { name: 'Settings', path: '/settings', icon: Settings },
+  const role = user?.role || 'ADMIN';
+
+  const allMenuItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'MANAGER'] },
+    { name: 'Lunch Packs', path: '/lunch-packs', icon: Beef, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+    // { name: 'Curry Point POS', path: '/curry-point', icon: Soup, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+    // { name: 'Catering Orders', path: '/catering', icon: UtensilsCrossed, roles: ['ADMIN', 'MANAGER'] },
+    { name: 'Worker Payroll', path: '/workers', icon: Users, roles: ['ADMIN'] },
+    { name: 'Inventory Stock', path: '/inventory', icon: Package, roles: ['ADMIN', 'MANAGER'] },
+    { name: 'Expenses', path: '/expenses', icon: Receipt, roles: ['ADMIN', 'MANAGER'] },
+    { name: 'Reports', path: '/reports', icon: BarChart3, roles: ['ADMIN'] },
+    { name: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
   ];
+
+  const menuItems = allMenuItems.filter((item) => item.roles.includes(role));
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -73,9 +77,8 @@ export default function Sidebar({ user }: SidebarProps) {
 
       {/* Main Sidebar Container */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-[#faf6ee] border-r border-[#871a1d]/10 z-50 flex flex-col transition-transform duration-300 md:translate-x-0 no-print ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-[#faf6ee] border-r border-[#871a1d]/10 z-50 flex flex-col transition-transform duration-300 md:translate-x-0 no-print ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Brand Header */}
         <div className="p-6 border-b border-[#871a1d]/10 flex items-center justify-between">
@@ -110,22 +113,75 @@ export default function Sidebar({ user }: SidebarProps) {
         <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto scrollbar-thin font-sans">
           {menuItems.map((item) => {
             const Icon = item.icon;
+
+            if (item.path === '/lunch-packs') {
+              const searchParams = useSearchParams();
+              const currentView = searchParams.get('view') || 'orders';
+              const isActiveParent = pathname === '/lunch-packs';
+
+              return (
+                <div key={item.name} className="space-y-1">
+                  {/* Parent Section Title */}
+                  <div
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-[#871a1d] bg-[#871a1d]/5 border-l-4 border-[#b59410]/60`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0 text-[#871a1d]" />
+                    <span>{item.name}</span>
+                  </div>
+                  {/* Sub-menu nested list */}
+                  <div className="pl-4 ml-6 space-y-1 border-l border-[#871a1d]/10 mt-1">
+                    <Link
+                      href="/lunch-packs?view=customers"
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${isActiveParent && currentView === 'customers'
+                        ? 'bg-[#871a1d]/10 text-[#871a1d] border-l-2 border-[#871a1d]'
+                        : 'text-slate-600 hover:text-[#871a1d] hover:bg-[#871a1d]/5'
+                        }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#b59410]/60 shrink-0" />
+                      <span>Customers</span>
+                    </Link>
+                    <Link
+                      href="/lunch-packs?view=orders"
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${isActiveParent && currentView === 'orders'
+                        ? 'bg-[#871a1d]/10 text-[#871a1d] border-l-2 border-[#871a1d]'
+                        : 'text-slate-600 hover:text-[#871a1d] hover:bg-[#871a1d]/5'
+                        }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#b59410]/60 shrink-0" />
+                      <span>Orders</span>
+                    </Link>
+                    <Link
+                      href="/lunch-packs?view=pricing"
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${isActiveParent && currentView === 'pricing'
+                        ? 'bg-[#871a1d]/10 text-[#871a1d] border-l-2 border-[#871a1d]'
+                        : 'text-slate-600 hover:text-[#871a1d] hover:bg-[#871a1d]/5'
+                        }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#b59410]/60 shrink-0" />
+                      <span>Pricing Plans</span>
+                    </Link>
+                  </div>
+                </div>
+              );
+            }
+
             const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
             return (
               <Link
                 key={item.name}
                 href={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${
-                  isActive
-                    ? 'bg-[#871a1d]/10 border-l-4 border-[#871a1d] text-[#871a1d] font-semibold shadow-inner'
-                    : 'text-slate-600 hover:text-[#871a1d] hover:bg-[#871a1d]/5 border-l-4 border-transparent'
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${isActive
+                  ? 'bg-[#871a1d]/10 border-l-4 border-[#871a1d] text-[#871a1d] font-semibold shadow-inner'
+                  : 'text-slate-600 hover:text-[#871a1d] hover:bg-[#871a1d]/5 border-l-4 border-transparent'
+                  }`}
               >
                 <Icon
-                  className={`w-5 h-5 transition-colors shrink-0 ${
-                    isActive ? 'text-[#871a1d]' : 'text-slate-500 group-hover:text-[#871a1d]'
-                  }`}
+                  className={`w-5 h-5 transition-colors shrink-0 ${isActive ? 'text-[#871a1d]' : 'text-slate-500 group-hover:text-[#871a1d]'
+                    }`}
                 />
                 <span>{item.name}</span>
               </Link>

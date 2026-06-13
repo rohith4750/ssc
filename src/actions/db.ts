@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import bcrypt from 'bcryptjs';
 
 // ==========================================
 // 1. SETTINGS & CONSTANTS
@@ -40,22 +41,141 @@ export async function addLunchCustomer(data: {
   id: string;
   name?: string;
   phone?: string;
+  route?: string;
+  address?: string;
+  mode: string;
   defaultPackType: string;
   defaultWithRice: boolean;
+  monthlyPrice?: number;
 }) {
   const customer = await prisma.lunchCustomer.create({
     data: {
       id: data.id,
-      qrCode: data.id, // QR code string matches customer code
       name: data.name || null,
       phone: data.phone || null,
+      route: data.route || null,
+      address: data.address || null,
+      mode: data.mode,
       defaultPackType: data.defaultPackType,
       defaultWithRice: data.defaultWithRice,
+      monthlyPrice: data.monthlyPrice || 0,
       active: true,
     },
   });
   revalidatePath('/lunch-packs');
   return customer;
+}
+
+export async function updateLunchCustomer(
+  id: string,
+  data: {
+    name?: string;
+    phone?: string;
+    route?: string;
+    address?: string;
+    mode: string;
+    defaultPackType: string;
+    defaultWithRice: boolean;
+    monthlyPrice?: number;
+    active?: boolean;
+  }
+) {
+  const customer = await prisma.lunchCustomer.update({
+    where: { id },
+    data: {
+      name: data.name || null,
+      phone: data.phone || null,
+      route: data.route || null,
+      address: data.address || null,
+      mode: data.mode,
+      defaultPackType: data.defaultPackType,
+      defaultWithRice: data.defaultWithRice,
+      monthlyPrice: data.monthlyPrice || 0,
+      active: data.active !== undefined ? data.active : true,
+    },
+  });
+  revalidatePath('/lunch-packs');
+  return customer;
+}
+
+export async function getDailyTransactions(dateStr: string) {
+  const dateObj = new Date(dateStr);
+  const startOfDay = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+  const endOfDay = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 23, 59, 59, 999);
+
+  return prisma.dailyLunchTransaction.findMany({
+    where: {
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+  });
+}
+
+export async function saveDailyAttendance(
+  dateStr: string,
+  records: Array<{
+    customerId: string;
+    delivered: boolean;
+    packType: string;
+    withRice: boolean;
+    extras: any[];
+    totalAmount: number;
+    paymentStatus: string;
+  }>
+) {
+  const dateObj = new Date(dateStr);
+  const startOfDay = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+  const endOfDay = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 23, 59, 59, 999);
+
+  const customerIds = records.map((r) => r.customerId);
+
+  // Clear previous daily transactions for this subset of customers on this date
+  await prisma.dailyLunchTransaction.deleteMany({
+    where: {
+      customerId: { in: customerIds },
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+  });
+
+  const created = [];
+  for (const r of records) {
+    if (r.delivered) {
+      const entry = await prisma.dailyLunchTransaction.create({
+        data: {
+          date: new Date(dateStr),
+          customerId: r.customerId,
+          packType: r.packType,
+          withRice: r.withRice,
+          extras: r.extras,
+          totalAmount: r.totalAmount,
+          paymentStatus: r.paymentStatus,
+        },
+      });
+
+      if (r.paymentStatus === 'PAID') {
+        await prisma.payment.create({
+          data: {
+            date: new Date(dateStr),
+            amount: r.totalAmount,
+            method: 'CASH',
+            referenceType: 'LUNCH_PACK',
+            referenceId: r.customerId,
+            notes: `Instant payment for daily delivery on ${dateStr}`,
+          },
+        });
+      }
+      created.push(entry);
+    }
+  }
+
+  revalidatePath('/lunch-packs');
+  revalidatePath('/dashboard');
+  return created;
 }
 
 export async function toggleLunchCustomerStatus(id: string, active: boolean) {
@@ -142,7 +262,12 @@ export async function generateMonthlyInvoice(customerId: string, year: number, m
     orderBy: { date: 'asc' },
   });
 
-  const totalAmount = transactions.reduce((acc, t) => acc + t.totalAmount, 0);
+  let totalAmount = 0;
+  if (customer.mode === 'MONTHLY') {
+    totalAmount = (customer.monthlyPrice || 0) + transactions.reduce((acc, t) => acc + t.totalAmount, 0);
+  } else {
+    totalAmount = transactions.reduce((acc, t) => acc + t.totalAmount, 0);
+  }
 
   // Get total payments made by customer in this month
   const payments = await prisma.payment.findMany({
@@ -863,10 +988,30 @@ export async function getDashboardStats() {
     _sum: { totalAmount: true },
   });
 
-  const lunchSalesMonth = await prisma.dailyLunchTransaction.aggregate({
+  const lunchSalesMonthAgg = await prisma.dailyLunchTransaction.aggregate({
     where: { date: { gte: startOfMonth } },
     _sum: { totalAmount: true },
   });
+
+  // Find unique monthly customers who had active deliveries this month
+  const activeMonthlyCustomersThisMonth = await prisma.lunchCustomer.findMany({
+    where: {
+      mode: 'MONTHLY',
+      transactions: {
+        some: {
+          date: { gte: startOfMonth }
+        }
+      }
+    },
+    select: { monthlyPrice: true }
+  });
+
+  const monthlySubscriptionsThisMonth = activeMonthlyCustomersThisMonth.reduce(
+    (sum, c) => sum + (c.monthlyPrice || 0),
+    0
+  );
+
+  const lunchSalesMonth = (lunchSalesMonthAgg._sum.totalAmount || 0) + monthlySubscriptionsThisMonth;
 
   const bulkSalesMonth = await prisma.bulkOrder.aggregate({
     where: { date: { gte: startOfMonth } },
@@ -875,7 +1020,7 @@ export async function getDashboardStats() {
 
   const salesMonth =
     (currySalesMonth._sum.totalAmount || 0) +
-    (lunchSalesMonth._sum.totalAmount || 0) +
+    (lunchSalesMonth || 0) +
     (bulkSalesMonth._sum.totalAmount || 0);
 
   const expensesMonthAgg = await prisma.expense.aggregate({
@@ -960,7 +1105,30 @@ export async function getReportStats(startDateStr: string, endDateStr: string) {
 
   // Sum calculations
   const totalCurry = currySales.reduce((sum, o) => sum + o.totalAmount, 0);
-  const totalLunch = lunchSales.reduce((sum, o) => sum + o.totalAmount, 0);
+  
+  let totalLunch = lunchSales.reduce((sum, o) => sum + o.totalAmount, 0);
+
+  // Add flat monthly pricing for monthly customers who had active deliveries in this period
+  const activeMonthlyCustomerIds = Array.from(
+    new Set(
+      lunchSales
+        .filter((o) => o.customer.mode === 'MONTHLY')
+        .map((o) => o.customerId)
+    )
+  );
+
+  const activeMonthlyCustomers = await prisma.lunchCustomer.findMany({
+    where: { id: { in: activeMonthlyCustomerIds } },
+    select: { monthlyPrice: true },
+  });
+
+  const monthlySubscriptions = activeMonthlyCustomers.reduce(
+    (sum, c) => sum + (c.monthlyPrice || 0),
+    0
+  );
+
+  totalLunch += monthlySubscriptions;
+
   const totalBulk = bulkSales.reduce((sum, o) => sum + o.totalAmount, 0);
   
   // In catering, we account the money as revenue when billed / paid (advance + balance received)
@@ -990,4 +1158,128 @@ export async function getReportStats(startDateStr: string, endDateStr: string) {
     bulkSales,
     cateringOrders,
   };
+}
+
+// ==========================================
+// 10. SYSTEM USER MANAGEMENT
+// ==========================================
+
+export async function getUsers() {
+  return prisma.user.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function createUser(data: {
+  email: string;
+  password?: string;
+  name: string;
+  role: string;
+}) {
+  const hashedPassword = bcrypt.hashSync(data.password || 'password123', 10);
+  const user = await prisma.user.create({
+    data: {
+      email: data.email.toLowerCase().trim(),
+      password: hashedPassword,
+      name: data.name.trim(),
+      role: data.role,
+      active: true,
+    },
+  });
+  revalidatePath('/settings');
+  return user;
+}
+
+export async function updateUser(
+  id: string,
+  data: {
+    email: string;
+    password?: string;
+    name: string;
+    role: string;
+    active: boolean;
+  }
+) {
+  const updateData: any = {
+    email: data.email.toLowerCase().trim(),
+    name: data.name.trim(),
+    role: data.role,
+    active: data.active,
+  };
+  if (data.password && data.password.trim() !== '') {
+    updateData.password = bcrypt.hashSync(data.password, 10);
+  }
+  const user = await prisma.user.update({
+    where: { id },
+    data: updateData,
+  });
+  revalidatePath('/settings');
+  return user;
+}
+
+export async function deleteUser(id: string) {
+  const user = await prisma.user.delete({
+    where: { id },
+  });
+  revalidatePath('/settings');
+  return user;
+}
+
+// ==========================================
+// 7. LUNCH PACK PRICE MASTER CRUD
+// ==========================================
+
+export async function getLunchPackPrices() {
+  return prisma.lunchPackPrice.findMany({
+    orderBy: [
+      { mode: 'asc' },
+      { packType: 'asc' },
+      { withRice: 'asc' }
+    ]
+  });
+}
+
+export async function createLunchPackPrice(data: {
+  mode: string;
+  packType: string;
+  withRice: boolean;
+  price: number;
+}) {
+  const plan = await prisma.lunchPackPrice.create({
+    data: {
+      mode: data.mode.toUpperCase().trim(),
+      packType: data.packType.toUpperCase().trim(),
+      withRice: data.withRice,
+      price: data.price,
+      active: true,
+    },
+  });
+  revalidatePath('/lunch-packs');
+  return plan;
+}
+
+export async function updateLunchPackPrice(
+  id: string,
+  data: {
+    price?: number;
+    active?: boolean;
+  }
+) {
+  const plan = await prisma.lunchPackPrice.update({
+    where: { id },
+    data: {
+      price: data.price !== undefined ? data.price : undefined,
+      active: data.active !== undefined ? data.active : undefined,
+    },
+  });
+  revalidatePath('/lunch-packs');
+  return plan;
+}
+
+export async function deleteLunchPackPrice(id: string) {
+  const plan = await prisma.lunchPackPrice.delete({
+    where: { id },
+  });
+  revalidatePath('/lunch-packs');
+  return plan;
 }
