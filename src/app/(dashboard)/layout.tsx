@@ -16,7 +16,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background text-foreground">
       {/* Sidebar navigation */}
       <Suspense fallback={<div className="w-64 bg-[#faf6ee] border-r border-[#871a1d]/10 shrink-0 no-print"></div>}>
         <Sidebar user={session.user} />
