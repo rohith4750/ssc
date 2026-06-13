@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+import { useConfirm } from '@/components/confirm-provider';
 import { getSettings, updateSetting, getMenuItems, createMenuItem, getUsers, createUser, updateUser, deleteUser } from '@/actions/db';
 import { useSession } from 'next-auth/react';
 import {
@@ -20,6 +22,7 @@ import {
 export default function SettingsPage() {
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === 'ADMIN';
+  const confirm = useConfirm();
 
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -99,11 +102,11 @@ export default function SettingsPage() {
           await updateSetting(key, pricingFields[key]);
         }
       }
-      alert('Global configurations updated successfully');
+      toast.success('Global configurations updated successfully');
       handleReload();
     } catch (err) {
       console.error(err);
-      alert('Failed to update configurations');
+      toast.error('Failed to update configurations');
     } finally {
       setIsSavingSettings(false);
     }
@@ -126,10 +129,10 @@ export default function SettingsPage() {
       setNewMenuPrice('');
       
       handleReload();
-      alert('New item registered in system menu');
+      toast.success('New item registered in system menu');
     } catch (err) {
       console.error(err);
-      alert('Failed to register menu item');
+      toast.error('Failed to register menu item');
     }
   };
 
@@ -150,10 +153,10 @@ export default function SettingsPage() {
       setNewUserName('');
       setNewUserRole('STAFF');
       await handleReload();
-      alert('New system user registered successfully');
+      toast.success('New system user registered successfully');
     } catch (err: any) {
       console.error(err);
-      alert(err.message || 'Failed to create user');
+      toast.error(err.message || 'Failed to create user');
     } finally {
       setIsSavingUser(false);
     }
@@ -184,10 +187,10 @@ export default function SettingsPage() {
       });
       setEditingUser(null);
       await handleReload();
-      alert('User updated successfully');
+      toast.success('User updated successfully');
     } catch (err: any) {
       console.error(err);
-      alert(err.message || 'Failed to update user');
+      toast.error(err.message || 'Failed to update user');
     } finally {
       setIsSavingUser(false);
     }
@@ -196,7 +199,7 @@ export default function SettingsPage() {
   // Toggle User Active Status
   const handleToggleUserStatus = async (user: any) => {
     if (user.email === session?.user?.email) {
-      alert('You cannot deactivate your own account.');
+      toast.success('You cannot deactivate your own account.');
       return;
     }
     try {
@@ -207,29 +210,29 @@ export default function SettingsPage() {
         active: !user.active,
       });
       await handleReload();
-      alert(`User status updated to ${!user.active ? 'Active' : 'Inactive'}`);
+      toast.success(`User status updated to ${!user.active ? 'Active' : 'Inactive'}`);
     } catch (err: any) {
       console.error(err);
-      alert('Failed to update status');
+      toast.error('Failed to update status');
     }
   };
 
   // Delete User
   const handleDeleteUser = async (user: any) => {
     if (user.email === session?.user?.email) {
-      alert('You cannot delete your own account.');
+      toast.success('You cannot delete your own account.');
       return;
     }
-    if (!confirm(`Are you sure you want to permanently delete user "${user.name}"?`)) {
+    if (!(await confirm({ title: 'Delete User', message: `Are you sure you want to permanently delete user "${user.name}"?`, danger: true }))) {
       return;
     }
     try {
       await deleteUser(user.id);
       await handleReload();
-      alert('User deleted successfully');
+      toast.success('User deleted successfully');
     } catch (err: any) {
       console.error(err);
-      alert('Failed to delete user');
+      toast.error('Failed to delete user');
     }
   };
 
@@ -747,7 +750,7 @@ export default function SettingsPage() {
       {editingUser && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-6 rounded-2xl glass-panel relative flex flex-col gap-4 font-sans text-xs">
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
               <h3 className="text-base font-bold text-white">
                 Edit User: {editingUser.name}
               </h3>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { getExpenses, createExpense } from '@/actions/db';
 import {
   Receipt,
@@ -76,10 +77,10 @@ export default function ExpensesPage() {
       setExpenseDate(new Date().toISOString().split('T')[0]);
 
       handleReload();
-      alert('Expense logged successfully');
+      toast.success('Expense logged successfully');
     } catch (err) {
       console.error(err);
-      alert('Failed to log expense');
+      toast.error('Failed to log expense');
     }
   };
 

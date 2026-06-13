@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   getInventory,
   recordInventoryTransaction,
@@ -84,10 +85,10 @@ export default function InventoryPage() {
       setActiveItem(null);
       
       handleReload();
-      alert('Inventory ledger updated successfully');
+      toast.success('Inventory ledger updated successfully');
     } catch (err) {
       console.error(err);
-      alert('Failed to update inventory transaction');
+      toast.error('Failed to update inventory transaction');
     }
   };
 
@@ -110,10 +111,10 @@ export default function InventoryPage() {
       setShowAddItem(false);
 
       handleReload();
-      alert('New inventory item added successfully');
+      toast.success('New inventory item added successfully');
     } catch (err) {
       console.error(err);
-      alert('Failed to add inventory item');
+      toast.error('Failed to add inventory item');
     }
   };
 
@@ -168,7 +169,7 @@ export default function InventoryPage() {
                     >
                       <div>
                         {/* Title */}
-                        <div className="flex justify-between items-start gap-2">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-3 gap-2">
                           <div>
                             <span className="font-bold text-white text-base block">{item.name}</span>
                             <span className="text-[10px] text-slate-400 uppercase tracking-wider block mt-0.5">
@@ -230,7 +231,7 @@ export default function InventoryPage() {
             <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1 scrollbar-thin divide-y divide-white/5">
               {transactions.length > 0 ? (
                 transactions.map((tx) => (
-                  <div key={tx.id} className="flex justify-between items-start py-3 text-xs">
+                  <div key={tx.id} className="flex flex-col sm:flex-row justify-between items-start gap-3 py-3 text-xs">
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold text-white text-xs">{tx.inventoryItem.name}</span>
@@ -276,7 +277,7 @@ export default function InventoryPage() {
       {activeItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-6 rounded-2xl glass-panel glow-green space-y-4">
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 {transactionType === 'PURCHASED' ? <ArrowUpRight className="w-5 h-5 text-emerald-400" /> : <ArrowDownLeft className="w-5 h-5 text-red-400" />}
                 <span>Record {transactionType} - {activeItem.name}</span>
@@ -355,7 +356,7 @@ export default function InventoryPage() {
       {showAddItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-6 rounded-2xl glass-panel glow-green space-y-4">
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Plus className="w-5 h-5 text-emerald-400" /> Create Inventory Item Type
               </h3>

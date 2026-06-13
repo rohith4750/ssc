@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { getReportStats } from '@/actions/db';
 import {
   BarChart3,
@@ -53,7 +54,7 @@ export default function ReportsPage() {
       setReport(stats);
     } catch (e) {
       console.error(e);
-      alert('Failed to load report logs');
+      toast.error('Failed to load report logs');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   getCateringOrders,
   createCateringOrder,
@@ -107,10 +108,10 @@ export default function CateringPage() {
       setShowAddOrder(false);
       
       handleReload();
-      alert('Catering order registered successfully');
+      toast.success('Catering order registered successfully');
     } catch (err) {
       console.error(err);
-      alert('Failed to register catering order');
+      toast.error('Failed to register catering order');
     }
   };
 
@@ -147,10 +148,10 @@ export default function CateringPage() {
       setInstallmentAmount('');
       setInstallmentNotes('');
       handleReload();
-      alert('Installment payment registered successfully');
+      toast.success('Installment payment registered successfully');
     } catch (err) {
       console.error(err);
-      alert('Failed to log payment');
+      toast.error('Failed to log payment');
     }
   };
 
@@ -212,7 +213,7 @@ export default function CateringPage() {
             </div>
           </div>
 
-          <table class="info-table">
+          <div className="w-full overflow-x-auto border border-white/5 rounded-xl scrollbar-thin mb-4"><table class="info-table">
             <tr>
               <td style="width: 50%; vertical-align: top;">
                 <strong>CLIENT INFORMATION</strong><br/>
@@ -226,7 +227,7 @@ export default function CateringPage() {
                 Guaranteed Guests: ${selectedOrder.guestCount}
               </td>
             </tr>
-          </table>
+          </table></div>
 
           <div class="menu-box">
             <div class="menu-title">SELECTED EVENT MENU</div>
@@ -387,7 +388,7 @@ export default function CateringPage() {
         <div className="xl:col-span-5 space-y-6">
           {selectedOrder ? (
             <div className="p-6 rounded-2xl glass-panel relative space-y-6">
-              <div className="flex justify-between items-start border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-3 border-b border-white/5 pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-white">{selectedOrder.customerName}</h3>
                   <span className="text-xs text-slate-400 block mt-0.5">Reference: cat_${selectedOrder.id.slice(0, 8)}</span>
@@ -552,7 +553,7 @@ export default function CateringPage() {
       {showAddOrder && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-2xl p-6 rounded-2xl glass-panel glow-green space-y-6">
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <UtensilsCrossed className="w-5 h-5 text-emerald-400" /> Book New Catering Event
               </h3>

@@ -45,8 +45,9 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md p-8 rounded-2xl glass-panel glow-crimson relative z-10">
         <div className="flex flex-col items-center mb-8 text-center">
-          <div className="w-24 h-24 mb-4 relative flex items-center justify-center">
-            <img src="/logo.png" alt="Sri Sandilyasa Caterers Logo" className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(181,148,16,0.25)]" />
+          <div className="w-20 h-20 mb-4 bg-gradient-to-br from-[#871a1d] to-[#b59410] rounded-2xl flex items-center justify-center shadow-lg shadow-[#b59410]/20 transform rotate-3">
+            <div className="bg-white/10 w-full h-full absolute rounded-2xl backdrop-blur-sm"></div>
+            <span className="text-3xl font-black text-white tracking-wider relative z-10 drop-shadow-md -rotate-3">SSC</span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#871a1d] mb-1">Sri Sandilyasa</h1>
           <p className="text-[#b59410] font-bold tracking-wider font-sans uppercase text-sm">Caterers</p>

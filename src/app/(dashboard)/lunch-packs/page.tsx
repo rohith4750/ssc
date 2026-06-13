@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { toast } from 'react-hot-toast';
+import { useConfirm } from '@/components/confirm-provider';
 import { useSearchParams } from 'next/navigation';
 import {
   getLunchCustomers,
@@ -39,6 +41,7 @@ import {
 import * as XLSX from 'xlsx';
 
 function LunchPacksContent() {
+  const confirm = useConfirm();
   // Core lists
   const [customers, setCustomers] = useState<any[]>([]);
   const [dailyTransactions, setDailyTransactions] = useState<any[]>([]);
@@ -345,11 +348,11 @@ function LunchPacksContent() {
         ...val,
       }));
       await saveDailyAttendance(selectedDate, records);
-      alert(`Attendance checklist saved successfully for ${selectedDate}`);
+      toast.success(`Attendance checklist saved successfully for ${selectedDate}`);
       loadAttendanceData();
     } catch (e) {
       console.error(e);
-      alert('Failed to save daily attendance');
+      toast.error('Failed to save daily attendance');
     }
   };
 
@@ -390,7 +393,7 @@ function LunchPacksContent() {
       setNewCustAddress('');
       setNewCustMonthlyPrice('');
       setShowAddCustomer(false);
-      alert('Lunch customer registered successfully!');
+      toast.success('Lunch customer registered successfully!');
     } catch (err) {
       setFormError('Failed to create customer record.');
     }
@@ -429,9 +432,9 @@ function LunchPacksContent() {
 
       setEditingCustProfile(null);
       loadAttendanceData();
-      alert('Subscriber profile updated successfully!');
+      toast.success('Subscriber profile updated successfully!');
     } catch (err) {
-      alert('Failed to update subscriber profile.');
+      toast.error('Failed to update subscriber profile.');
     }
   };
 
@@ -447,10 +450,10 @@ function LunchPacksContent() {
         price: parseFloat(newPlanPrice),
       });
       setNewPlanPrice('');
-      alert('Pricing plan added successfully!');
+      toast.success('Pricing plan added successfully!');
       loadAttendanceData();
     } catch (err) {
-      alert('Failed to create pricing plan. Make sure this combination is unique.');
+      toast.error('Failed to create pricing plan. Make sure this combination is unique.');
     }
   };
 
@@ -463,21 +466,21 @@ function LunchPacksContent() {
         active: editPlanActive,
       });
       setEditingPlan(null);
-      alert('Pricing plan updated successfully!');
+      toast.success('Pricing plan updated successfully!');
       loadAttendanceData();
     } catch (err) {
-      alert('Failed to update pricing plan.');
+      toast.error('Failed to update pricing plan.');
     }
   };
 
   const handleDeletePlan = async (id: string) => {
-    if (!confirm('Are you sure you want to permanently delete this pricing plan?')) return;
+    if (!(await confirm({ title: 'Delete Pricing Plan', message: 'Are you sure you want to permanently delete this pricing plan?', danger: true }))) return;
     try {
       await deleteLunchPackPrice(id);
-      alert('Pricing plan deleted successfully!');
+      toast.success('Pricing plan deleted successfully!');
       loadAttendanceData();
     } catch (err) {
-      alert('Failed to delete pricing plan.');
+      toast.error('Failed to delete pricing plan.');
     }
   };
 
@@ -507,9 +510,9 @@ function LunchPacksContent() {
       setPaymentAmount('');
       setPaymentNotes('');
       handleLoadInvoice(selectedInvoiceCustomer);
-      alert('Billing payment recorded successfully!');
+      toast.success('Billing payment recorded successfully!');
     } catch (err) {
-      alert('Failed to record payment');
+      toast.error('Failed to record payment');
     }
   };
 
@@ -772,7 +775,7 @@ function LunchPacksContent() {
 
           {/* Delivery Checklist Grid */}
           <div className="p-6 rounded-2xl glass-panel relative overflow-hidden space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-[#871a1d]/10">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-[#871a1d]/10">
               <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                 <Beef className="w-5 h-5 text-[#871a1d]" /> Delivery Attendance logs
               </h3>
@@ -1245,7 +1248,7 @@ function LunchPacksContent() {
             <div className="max-h-80 overflow-y-auto space-y-2 divide-y divide-[#871a1d]/5 scrollbar-thin">
               {filteredCustomers.length > 0 ? (
                 filteredCustomers.map((c) => (
-                  <div key={c.id} className="flex justify-between items-center py-3 px-2 text-xs hover:bg-[#871a1d]/5 transition rounded-lg">
+                  <div key={c.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 py-3 px-2 text-xs hover:bg-[#871a1d]/5 transition rounded-lg">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-[#871a1d] text-sm">{c.id}</span>
@@ -1477,7 +1480,7 @@ function LunchPacksContent() {
       {editingCustomer && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-6 rounded-2xl glass-panel glow-crimson space-y-5 no-print">
-            <div className="flex justify-between items-center border-b border-[#871a1d]/10 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#871a1d]/10 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-[#871a1d] uppercase">Adjust Delivery Options</h3>
                 <span className="text-[10px] text-slate-500 font-sans block mt-0.5">
@@ -1536,7 +1539,7 @@ function LunchPacksContent() {
               <div className="space-y-2.5 pt-2 border-t border-[#871a1d]/10">
                 <span className="block text-xs font-semibold text-slate-500 uppercase">Daily Add-on Extras</span>
                 {Object.keys(tempExtrasQty).map((extra) => (
-                  <div key={extra} className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-200">
+                  <div key={extra} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-2 rounded-lg bg-slate-50 border border-slate-200">
                     <div>
                       <span className="font-semibold text-slate-800 block">{extra}</span>
                       <span className="text-[9px] text-[#b59410]">
@@ -1563,7 +1566,7 @@ function LunchPacksContent() {
               </div>
 
               {/* Total projection */}
-              <div className="p-3 bg-[#871a1d]/5 border border-[#871a1d]/10 rounded-xl flex justify-between items-center text-xs">
+              <div className="p-3 bg-[#871a1d]/5 border border-[#871a1d]/10 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs">
                 <span className="font-bold text-slate-700">Calculated Cost:</span>
                 <span className="font-bold text-base text-[#871a1d]">
                   ₹{getRowCalculatedTotal(editingCustomer, tempPackType, tempWithRice, tempExtrasQty)}
@@ -1586,7 +1589,7 @@ function LunchPacksContent() {
       {showAddCustomer && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-6 rounded-2xl glass-panel glow-crimson space-y-4 no-print">
-            <div className="flex justify-between items-center border-b border-[#871a1d]/10 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#871a1d]/10 pb-3">
               <h3 className="text-base font-bold text-[#871a1d] flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-[#871a1d]" /> Register Subscriber
               </h3>
@@ -1737,7 +1740,7 @@ function LunchPacksContent() {
       {editingCustProfile && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-6 rounded-2xl glass-panel glow-crimson space-y-4 no-print">
-            <div className="flex justify-between items-center border-b border-[#871a1d]/10 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#871a1d]/10 pb-3">
               <h3 className="text-base font-bold text-[#871a1d] flex items-center gap-2">
                 <Edit className="w-5 h-5 text-[#871a1d]" /> Edit Subscriber Profile
               </h3>
@@ -1891,7 +1894,7 @@ function LunchPacksContent() {
       {editingPlan && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-6 rounded-2xl glass-panel glow-crimson space-y-4 no-print">
-            <div className="flex justify-between items-center border-b border-[#871a1d]/10 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#871a1d]/10 pb-3">
               <h3 className="text-base font-bold text-[#871a1d] flex items-center gap-2">
                 <Edit className="w-5 h-5 text-[#871a1d]" /> Edit Pricing Plan
               </h3>

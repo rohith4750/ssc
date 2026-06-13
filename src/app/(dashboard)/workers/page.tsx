@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   getWorkers,
   addWorker,
@@ -151,7 +152,7 @@ export default function WorkersPage() {
       }));
 
       await saveAttendanceRecords(attendanceDate, formattedRecords);
-      alert('Attendance register updated successfully');
+      toast.success('Attendance register updated successfully');
       
       // If a payroll is loaded, update details
       if (selectedWorker) {
@@ -159,7 +160,7 @@ export default function WorkersPage() {
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to save attendance register');
+      toast.error('Failed to save attendance register');
     }
   };
 
@@ -187,10 +188,10 @@ export default function WorkersPage() {
       const list = await getWorkers();
       setWorkers(list);
       await handleLoadAttendance(attendanceDate, list);
-      alert('Staff profile added successfully');
+      toast.success('Staff profile added successfully');
     } catch (err) {
       console.error(err);
-      alert('Failed to add worker');
+      toast.error('Failed to add worker');
     }
   };
 
@@ -221,10 +222,10 @@ export default function WorkersPage() {
       setPayNotes('');
       // Reload ledger statement
       handleLoadPayroll(selectedWorker);
-      alert('Payment registered and logged as salary expense');
+      toast.success('Payment registered and logged as salary expense');
     } catch (err) {
       console.error(err);
-      alert('Failed to log payment');
+      toast.error('Failed to log payment');
     }
   };
 
@@ -372,7 +373,7 @@ export default function WorkersPage() {
               {workers.map((w) => (
                 <div
                   key={w.id}
-                  className="flex justify-between items-center py-3 px-2 text-xs hover:bg-white/5 transition rounded-lg"
+                  className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 py-3 px-2 text-xs hover:bg-white/5 transition rounded-lg"
                 >
                   <div>
                     <span className="font-bold text-white text-sm block">{w.name}</span>
@@ -586,7 +587,7 @@ export default function WorkersPage() {
       {showAddWorker && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md p-6 rounded-2xl glass-panel glow-green space-y-4">
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <ChefHat className="w-5 h-5 text-emerald-400" /> Add New Staff Profile
               </h3>

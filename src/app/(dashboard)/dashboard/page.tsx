@@ -140,7 +140,7 @@ export default async function DashboardPage() {
             <h3 className="text-base font-semibold text-white mb-4">Operational Status</h3>
             <div className="space-y-4">
               {/* Workers active */}
-              <div className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
                 <div className="flex items-center gap-3">
                   <Users className="w-5 h-5 text-emerald-400" />
                   <span className="text-sm font-medium text-slate-200">Staff Present Today</span>
@@ -151,7 +151,7 @@ export default async function DashboardPage() {
               </div>
 
               {/* Low stock count */}
-              <div className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
                 <div className="flex items-center gap-3">
                   <Package className="w-5 h-5 text-amber-400" />
                   <span className="text-sm font-medium text-slate-200">Low Stock Thresholds</span>
